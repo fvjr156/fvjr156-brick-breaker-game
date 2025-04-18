@@ -1,9 +1,13 @@
 package src.com.fvjapps.brickgame;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import java.awt.event.KeyListener;
+import java.net.URL;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -22,6 +26,7 @@ public class Game extends JPanel implements KeyListener, ActionListener {
     private final Bounds bounds;
 
     private int ballSpeed = 3;
+    private int paddleWidth = 110;
     private int gameScore = 0;
     private int delay = 8;
     private int playerX = 310;
@@ -41,19 +46,21 @@ public class Game extends JPanel implements KeyListener, ActionListener {
 
     private String languageCode = "EN";
     private String[] strings = Strings.getStrings(languageCode);
+    private int mapRows = 19, mapCols = 18;
 
     private MapGenerator mapGen;
 
     public Game(Bounds bounds) {
         this.bounds = bounds;
         setPreferredSize(new Dimension(bounds.width(), bounds.height()));
-        mapGen = new MapGenerator(23, 20);
+        mapGen = new MapGenerator(19, 18);
         addKeyListener(this);
         setFocusable(true);
         setFocusTraversalKeysEnabled(false);
         requestFocusInWindow();
         time = new Timer(delay, this);
         time.start();
+        ballHitSound();
     }
 
     @Override
@@ -73,10 +80,13 @@ public class Game extends JPanel implements KeyListener, ActionListener {
         gameGfx.fillRect(0, 0, bounds.width(), 3);
         gameGfx.fillRect(bounds.width() - 3, 0, 3, bounds.height());
 
-        // scoreboard
+        // score
+        String scoreText = strings[7] + gameScore;
+        Font scoreFont = new Font("Dialog", Font.BOLD, 25);
+        gameGfx.setFont(scoreFont);
+        FontMetrics scoreMetrics = gameGfx.getFontMetrics(scoreFont);
         gameGfx.setColor(Color.red);
-        gameGfx.setFont(new Font("Dialog", Font.BOLD, 25));
-        gameGfx.drawString(strings[7] + gameScore, 550, 30);
+        gameGfx.drawString(scoreText, bounds.width() - scoreMetrics.stringWidth(scoreText) - 20, 30);
 
         // game mode
         String modeLabel = strings[4]; // default EASY
@@ -86,9 +96,9 @@ public class Game extends JPanel implements KeyListener, ActionListener {
             modeLabel = strings[6];
         gameGfx.drawString(modeLabel, 20, 30);
 
-        // draws the green board
+        // draws the green paddle
         gameGfx.setColor(Color.green);
-        gameGfx.fillRect(playerX, bounds.height() - 60, 110, 8);
+        gameGfx.fillRect(playerX, bounds.height() - 60, paddleWidth, 8);
 
         // draws the yellow ball
         gameGfx.setColor(Color.yellow);
@@ -136,11 +146,10 @@ public class Game extends JPanel implements KeyListener, ActionListener {
                 ballPos.yDir = -ballPos.yDir;
             }
 
-            // if it hits the board, bounce
+            // if it hits the paddle, bounce
             if (new Rectangle(ballPos.x, ballPos.y, 20, 20)
-                    .intersects(new Rectangle(playerX, bounds.height() - 60, 110, 8))) {
+                    .intersects(new Rectangle(playerX, bounds.height() - 60, paddleWidth, 8))) {
 
-                int paddleWidth = 110;
                 int paddleCenter = playerX + paddleWidth / 2;
                 int ballCenter = ballPos.x + 10 / 2; // ball diameter = 10
                 int dx = ballCenter - paddleCenter;
@@ -169,7 +178,7 @@ public class Game extends JPanel implements KeyListener, ActionListener {
 
             }
 
-            // the game over, when ball goes below the board
+            // the game over, when ball goes below the paddle
             if (ballPos.y > bounds.height() - 10) {
                 isPlay = false;
                 ballPos.xDir = 0;
@@ -197,6 +206,8 @@ public class Game extends JPanel implements KeyListener, ActionListener {
                             } else {
                                 ballPos.yDir = -ballPos.yDir;
                             }
+
+                            ballHitSound();
 
                             break outer;
                         }
@@ -227,7 +238,7 @@ public class Game extends JPanel implements KeyListener, ActionListener {
 
         }
 
-        // paddle board movement
+        // paddle movement
         if (moveLeft && playerX > 5)
             playerX -= paddleMvtSpeed;
         if (moveRight && playerX < 595)
@@ -254,7 +265,7 @@ public class Game extends JPanel implements KeyListener, ActionListener {
     }
 
     // key bindings: LEFT. RIGHT. ENTER/RETURN
-    // moves the board left or right
+    // moves the paddle left or right
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_LEFT) {
@@ -286,14 +297,8 @@ public class Game extends JPanel implements KeyListener, ActionListener {
         }
         if (e.getKeyCode() == KeyEvent.VK_0) {
             if (!isPlay) {
-                // Toggle language between EN and JP
-                if (languageCode.equals("EN")) {
-                    languageCode = "JP";
-                } else {
-                    languageCode = "EN";
-                }
-                strings = Strings.getStrings(languageCode);
-                repaint();
+                // open settings window
+                new SettingsWindow(this);
             }
         }
     }
@@ -310,6 +315,45 @@ public class Game extends JPanel implements KeyListener, ActionListener {
         if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
             shiftPressed = false;
         }
+    }
+
+    private void ballHitSound() {
+        try {
+            URL soundURL = getClass().getResource("ballhit.wav"); // no leading slash
+            if (soundURL == null) {
+                System.err.println("Sound file not found");
+                return;
+            }
+            AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundURL);
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioIn);
+            clip.start();
+        } catch (Exception e) {
+            System.err.println("Error playing sound: " + e.getMessage());
+        }
+    }
+
+    public String getLanguageCode() {
+        return languageCode;
+    }
+
+    public int getMapRows() {
+        return mapRows;
+    }
+
+    public int getMapCols() {
+        return mapCols;
+    }
+
+    public void applySettings(String lang, int rows, int cols) {
+        this.languageCode = lang;
+        this.strings = Strings.getStrings(lang);
+    
+        this.mapRows = rows;
+        this.mapCols = cols;
+    
+        this.mapGen = new MapGenerator(rows, cols);
+        repaint();
     }
 
 }
