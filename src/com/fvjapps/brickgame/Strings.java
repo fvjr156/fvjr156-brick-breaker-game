@@ -9,7 +9,15 @@ public class Strings {
             "EASY",
             "NORMAL",
             "EXPERT",
-            "SCORE: "
+            "SCORE: ",
+            "Settings",
+            "Language",
+            "Brick Rows",
+            "Brick Columns",
+            "Ball Count",
+            "Save",
+            "CRAZY Mode",
+            "On game: ESC to exit mode."
     };
     private static final String JP[] = {
             "ブロック崩しゲーム",
@@ -19,13 +27,42 @@ public class Strings {
             "イージー",
             "ノーマル",
             "エキスパート",
-            "スコア: "
+            "スコア: ",
+            "設定",
+            "言語",
+            "ブロックの行数",
+            "ブロックの列数",
+            "ボールの数",
+            "保存",
+            "クレイジーモード",
+            "ゲーム中、ESCキー押したら、ゲームやめる。"
     };
+    private static final String CN[] = {
+        "打砖块游戏", 
+        "按ENTER键开始游戏。", 
+        "使用左右方向键移动。Shift键加速。",
+        "1、2、3切换游戏模式。0打开设置。", 
+        "简单", 
+        "普通",
+        "专家",
+        "分数: ",
+        "设置",
+        "语言",
+        "砖块行数",
+        "砖块列数",  
+        "球数", 
+        "保存",
+        "疯狂模式",
+        "游戏中，按ESC键退出模式。"
+    };
+    
 
     public static String[] getStrings(String code) {
         switch (code) {
             case "JP":
                 return JP;
+            case "CN":
+                return CN;
             default:
                 return EN;
         }
