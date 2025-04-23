@@ -1,2 +1,0 @@
-Main-Class: src.com.fvjapps.brickgame.Start 
- 
