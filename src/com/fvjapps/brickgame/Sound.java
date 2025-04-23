@@ -9,7 +9,7 @@ import javax.sound.sampled.Clip;
 public class Sound {
     public static void ballHitSound(Game g) {
         try {
-            URL soundURL = g.getClass().getResource("ballhit.wav"); // no leading slash
+            URL soundURL = g.getClass().getResource("ballhit.wav");
             if (soundURL == null) {
                 System.err.println("Sound file not found");
                 return;
@@ -23,3 +23,4 @@ public class Sound {
         }
     }
 }
+

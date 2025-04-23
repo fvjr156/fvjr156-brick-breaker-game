@@ -1,13 +1,9 @@
 package src.com.fvjapps.brickgame;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import java.awt.event.KeyListener;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.awt.Color;
@@ -272,11 +268,7 @@ public class Game extends JPanel implements KeyListener, ActionListener {
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {
-        // do nothing
-        // throw new UnsupportedOperationException("DEBUG: Unimplemented method
-        // 'keyTyped'");
-    }
+    public void keyTyped(KeyEvent e) {}
 
     // key bindings: LEFT. RIGHT. ENTER/RETURN
     // moves the paddle left or right
